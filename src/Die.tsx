@@ -31,6 +31,7 @@ type DieType = {
     index: number;
     held: boolean;
     locked: boolean;
+    selectable: boolean;
   };
   incrementValue: (index: number) => void;
   toggleHeld: (index: number) => void;
@@ -46,8 +47,12 @@ const Die: Component<DieType> = (props) => {
     <img
       //todo after rolling default contrast-50; contrast-100 if you can lock it
       //todo grayscale = black dice, grayscale + invert = white dice; light mode and dark mode?
-      // local.state.held ? "border-yellow-400 border-8 border-dashed" : ""
-      class={`w-32 cursor-pointer`}
+      class={`w-32 cursor-pointer 
+      ${
+        local.state.selectable ? "border-yellow-400 border-8 border-dashed" : ""
+      }
+      ${local.state.locked ? "border-red-400 border-8 border-dashed" : ""}
+      `}
       src={valueToImage(local.state.value)}
       onClick={() => local.toggleHeld(local.state.index)}
       draggable="false"
