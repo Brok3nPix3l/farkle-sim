@@ -1,4 +1,4 @@
-import { type Component, For, createEffect, on } from "solid-js";
+import { type Component, For, createEffect, on, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import Die from "./Die";
 
@@ -7,7 +7,15 @@ enum scoreGroupIds {
   THREE_PAIRS = 11,
 }
 
+enum scoreGroupStrings {
+  one = "one",
+  five = "five",
+}
+
 const App: Component = () => {
+  const [validSelection, setValidSelection] = createSignal(true);
+  const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
+  const [scoringString, setScoringString] = createSignal("");
   const [dice, setDice] = createStore([
     {
       index: 0,
@@ -189,6 +197,34 @@ const App: Component = () => {
       (value) => (value + 1) % 6 || 6
     );
   };
+  const checkIfSelectionIsValid = () => {
+    setCurrentTurnScore(0);
+    setScoringString("");
+    let selectedDice = dice.filter((die) => die.held && die.selectable);
+    let repeat = false;
+    do {
+      repeat = false;
+      const indexOf1 = selectedDice.findIndex((die) => die.value === 1);
+      if (indexOf1 !== -1) {
+        selectedDice.splice(indexOf1, 1);
+        setCurrentTurnScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
+        setScoringString(
+          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.one
+        );
+        repeat = true;
+      }
+      const indexOf5 = selectedDice.findIndex((die) => die.value === 5);
+      if (indexOf5 !== -1) {
+        selectedDice.splice(indexOf5, 1);
+        setCurrentTurnScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
+        setScoringString(
+          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.five
+        );
+        repeat = true;
+      }
+    } while (repeat && selectedDice.length > 0);
+    setValidSelection(selectedDice.length < 1);
+  };
   const toggleHeld = (index: number) => {
     if (dice.find((die) => die.index === index).locked) {
       alert("Cannot toggle held on this locked die");
@@ -198,14 +234,15 @@ const App: Component = () => {
       alert("Cannot toggle held on this unselectable die");
       return;
     }
-    const targetGroup = dice.find((die) => die.index === index).group;
-    console.log(`targetGroup: ${targetGroup}`);
-    console.table(dice);
+    // const targetGroup = dice.find((die) => die.index === index).group;
+    // console.log(`targetGroup: ${targetGroup}`);
+    // console.table(dice);
     setDice(
-      (die) => die.group === targetGroup,
+      (die) => die.index === index,
       "held",
       (held) => !held
     );
+    checkIfSelectionIsValid();
   };
   const lockDice = () => {
     setDice(
@@ -220,6 +257,9 @@ const App: Component = () => {
     );
   };
   const rollDice = () => {
+    setValidSelection(false);
+    setCurrentTurnScore(0);
+    setScoringString("");
     lockDice();
     setDice(
       (die) => !die.held,
@@ -233,6 +273,11 @@ const App: Component = () => {
   return (
     <>
       <p class="text-4xl text-green-700 text-center py-20">Farkle Sim</p>
+      {scoringString && (
+        <p class="text-center uppercase text-2xl">{`${scoringString()}${
+          currentTurnScore() ? ` - ${currentTurnScore()}` : ""
+        }`}</p>
+      )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
         <For each={storedDice()}>
           {(die) => {
@@ -261,9 +306,13 @@ const App: Component = () => {
         </For>
       </div>
 
-      <button class="w-full self-center text-2xl" onclick={rollDice}>
-        Roll
-      </button>
+      {validSelection() ? (
+        <button class="w-full text-center text-2xl" onclick={rollDice}>
+          Roll
+        </button>
+      ) : (
+        <p class="text-center text-2xl">Select or remove dice</p>
+      )}
     </>
   );
 };
