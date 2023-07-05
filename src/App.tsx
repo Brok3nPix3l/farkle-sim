@@ -7,7 +7,7 @@ const App: Component = () => {
       <p class="text-4xl text-green-700 text-center py-20">Farkle Sim</p>
       <div class="flex flex-row justify-evenly w-full">
         {[1,2,3,4,5,6].map(value => {
-          return <Die value={value} />
+          return <Die />
         })}
         {/* <Die value={1} />
         <Die value={2} />
