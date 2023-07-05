@@ -24,15 +24,20 @@ const App: Component = () => {
       <div class="flex flex-row justify-evenly w-full">
         <For each={dice}>
           {(die) => {
-            return (
-              <Die
-                value={die.value}
-                incrementValue={incrementValue(die.index)}
-              />
-            );
+            return <Die state={die} incrementValue={incrementValue} />;
           }}
         </For>
       </div>
+      <button
+        class="w-full self-center pt-10 text-2xl"
+        onclick={() =>
+          setDice({ from: 0, to: dice.length - 1 }, "value", (value) =>
+            Math.ceil(Math.random() * 6)
+          )
+        }
+      >
+        Roll
+      </button>
     </>
   );
 };

@@ -26,17 +26,20 @@ const valueToImage = (value: Number) => {
 };
 
 type DieType = {
-  value: number,
-  incrementValue: (index: number) => void
-}
+  state: {
+    value: number;
+    index: number;
+  };
+  incrementValue: (index: number) => void;
+};
 
 const Die: Component<DieType> = (props) => {
-  const [local, other] = splitProps(props, ["value"]);
+  const [local, other] = splitProps(props, ["state", "incrementValue"]);
   return (
     <img
       class="w-32 cursor-pointer"
-      src={valueToImage(local.value)}
-      onClick={() => other.incrementValue}
+      src={valueToImage(local.state.value)}
+      onClick={() => local.incrementValue(local.state.index)}
       draggable="false"
     />
   );
