@@ -1,4 +1,4 @@
-import { Component, createSignal } from "solid-js";
+import { Component, splitProps } from "solid-js";
 import die1 from "/die_1.png";
 import die2 from "/die_2.png";
 import die3 from "/die_3.png";
@@ -25,18 +25,19 @@ const valueToImage = (value: Number) => {
   }
 };
 
-interface Die {
-  value?: boolean;
+type DieType = {
+  value: number,
+  incrementValue: (index: number) => void
 }
 
-const Die: Component = (props) => {
-  // const [value] = props;
-  const [value, setValue] = createSignal(1);
+const Die: Component<DieType> = (props) => {
+  const [local, other] = splitProps(props, ["value"]);
   return (
     <img
       class="w-32 cursor-pointer"
-      src={valueToImage(value())}
-      onClick={() => setValue((prev) => (prev + 1) % 6 || 6)}
+      src={valueToImage(local.value)}
+      onClick={() => other.incrementValue}
+      draggable="false"
     />
   );
 };
