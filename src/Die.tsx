@@ -25,7 +25,12 @@ const valueToImage = (value: Number) => {
   }
 };
 
-const Die: Component = () => {
+interface Die {
+  value?: boolean;
+}
+
+const Die: Component = (props) => {
+  // const [value] = props;
   const [value, setValue] = createSignal(1);
   return (
     <img
