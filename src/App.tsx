@@ -233,7 +233,7 @@ const App: Component = () => {
   return (
     <>
       <p class="text-4xl text-green-700 text-center py-20">Farkle Sim</p>
-      <div class="flex flex-row justify-evenly w-full flex-wrap gap-5">
+      <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
         <For each={storedDice()}>
           {(die) => {
             return (
@@ -246,7 +246,8 @@ const App: Component = () => {
           }}
         </For>
       </div>
-      <div class="flex flex-row justify-evenly w-full pt-10 pb-10 flex-wrap gap-5">
+      {storedDice().length && <hr class="border-dashed border-8"></hr>}
+      <div class="flex flex-row justify-evenly w-full pt-5 pb-10 flex-wrap gap-5">
         <For each={activeDice()}>
           {(die) => {
             return (
