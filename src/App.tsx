@@ -293,7 +293,7 @@ const App: Component = () => {
     setScoringDiceAsSelectable();
   };
   return (
-    <div class="flex flex-col h-screen justify-center">
+    <div class="flex flex-col h-[100svh] justify-center">
       <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
