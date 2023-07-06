@@ -340,7 +340,15 @@ const App: Component = () => {
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
           currentRollScore() ? ` - ${currentRollScore()}` : ""
-        }${activeDice().length || !validSelection() ? "" : " Rollout!"}`}</p>
+        }${
+          validSelection()
+            ? activeDice().length
+              ? ""
+              : " Rollout!"
+            : dice.some((die) => die.selectable)
+            ? ""
+            : " Farkle!"
+        }`}</p>
       )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
         <For each={storedDice()}>
@@ -374,22 +382,22 @@ const App: Component = () => {
 
       {validSelection() ? (
         activeDice().length ? (
-          <div class="flex flex-row justify-center ml-16 mr-16 gap-10">
+          <>
             <button
-              class="px-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
+              class="py-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
               onclick={rollDice}
             >
               Roll
             </button>
             {(currentRollScore() || currentTurnScore()) && (
               <button
-                class=" p-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
+                class=" py-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
                 onclick={endTurn}
               >
                 Hold
               </button>
             )}
-          </div>
+          </>
         ) : (
           <button
             class="text-center text-2xl"
@@ -404,7 +412,16 @@ const App: Component = () => {
       ) : dice.some((die) => die.selectable) ? (
         <p class="text-center text-2xl">Select or remove dice</p>
       ) : (
-        <p class="text-center text-2xl">Farkle!</p>
+        <button
+          class="p-4 text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
+          onclick={() => {
+            setCurrentRollScore(0);
+            setCurrentTurnScore(0);
+            endTurn();
+          }}
+        >
+          End Turn
+        </button>
       )}
     </div>
   );
