@@ -25,19 +25,22 @@ const valueToImage = (value: Number) => {
   }
 };
 
-type DieType = {
-  state: {
-    value: number;
-    index: number;
-    held: boolean;
-    locked: boolean;
-    selectable: boolean;
-  };
+export type DieState = {
+  face: number;
+  index: number;
+  held: boolean;
+  locked: boolean;
+  selectable: boolean;
+  invalid?: boolean;
+};
+
+type DieProps = {
+  state: DieState;
   incrementValue: (index: number) => void;
   toggleHeld: (index: number) => void;
 };
 
-const Die: Component<DieType> = (props) => {
+const Die: Component<DieProps> = (props: DieProps) => {
   const [local, other] = splitProps(props, [
     "state",
     "incrementValue",
@@ -47,8 +50,8 @@ const Die: Component<DieType> = (props) => {
     <img
       class={`lg:w-32 md:w-28 w-24 cursor-pointer ${
         local.state.selectable ? "" : "saturate-50"
-      }`}
-      src={valueToImage(local.state.value)}
+      }${local.state.invalid ? "border-red-400 border-dashed border-8" : ""}`}
+      src={valueToImage(local.state.face)}
       onClick={() => local.toggleHeld(local.state.index)}
       draggable="false"
     />
