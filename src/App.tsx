@@ -162,8 +162,8 @@ const App: Component = () => {
     let repeat = false;
     do {
       repeat = false;
+      //fixme terrible hack to prevent unintended bugs; refactor to remove all of the if else statements
       //todo encapsulate these validation functions and sort them by score; use same validation here and in setScoringDiceAsSelectable?
-
       const frequencyMap = createFrequencyMap(selectedDice);
       // check if lgStraight
       //todo breaks if using > 6 dice
@@ -173,74 +173,81 @@ const App: Component = () => {
         setScoringString(
           (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.lgStraight
         );
-      }
-      // check if 3Pairs
-      if (selectedDice.length === 6) {
-        if (frequencyMap.size === 2 || frequencyMap.size === 3) {
-          let good = true;
-          frequencyMap.forEach((frequency) => {
-            if (frequency !== 2 && frequency !== 4) good = false;
-          });
-          if (good) {
-            selectedDice.splice(0);
-            setCurrentRollScore((prev) => prev + 1500);
-            setScoringString(
-              (prev) =>
-                prev + (prev ? " + " : "") + scoreGroupStrings.threePairs
+        repeat = true;
+      } else if (
+        selectedDice.length === 6 &&
+        (frequencyMap.size === 2 || frequencyMap.size === 3) &&
+        Array.from(frequencyMap.entries()).every(
+          (entry) => entry[1] == 2 || entry[1] == 4
+        )
+      ) {
+        // check if 3Pairs
+        // if (frequencyMap.size === 2 || frequencyMap.size === 3) {
+        //   let good = true;
+        //   frequencyMap.forEach((frequency) => {
+        //     if (frequency !== 2 && frequency !== 4) good = false;
+        //   });
+        // if (good) {
+        selectedDice.splice(0);
+        setCurrentRollScore((prev) => prev + 1500);
+        setScoringString(
+          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.threePairs
+        );
+        repeat = true;
+        break;
+        // }
+        // }
+      } else {
+        // check if triple
+        let tripleFace: number;
+        frequencyMap.forEach((frequency, face) => {
+          //todo refactor when implementing quads+
+          if (frequency >= 3) {
+            tripleFace = face;
+          }
+        });
+        if (tripleFace) {
+          for (let i = 0; i < 3; i++) {
+            const indexOfATripleFace = selectedDice.findIndex(
+              (die) => die.face === tripleFace
             );
-            break;
+            selectedDice.splice(indexOfATripleFace, 1);
+          }
+          setCurrentRollScore(
+            (prev) => prev + (tripleFace === 1 ? 1000 : tripleFace * 100)
+          ); //todo when implementing config, pull this value from a lookup
+          setScoringString(
+            (prev) =>
+              prev +
+              (prev ? " + " : "") +
+              scoreGroupStrings.triple +
+              " " +
+              tripleFace
+          );
+          repeat = true;
+        } else {
+          // check if 1
+          const indexOf1 = selectedDice.findIndex((die) => die.face === 1);
+          if (indexOf1 !== -1) {
+            selectedDice.splice(indexOf1, 1);
+            setCurrentRollScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
+            setScoringString(
+              (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.one
+            );
+            repeat = true;
+          }
+
+          // check if 5
+          const indexOf5 = selectedDice.findIndex((die) => die.face === 5);
+          if (indexOf5 !== -1) {
+            selectedDice.splice(indexOf5, 1);
+            setCurrentRollScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
+            setScoringString(
+              (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.five
+            );
+            repeat = true;
           }
         }
-      }
-
-      // check if triple
-      let tripleFace: number;
-      frequencyMap.forEach((frequency, face) => {
-        //todo refactor when implementing quads+
-        if (frequency >= 3) {
-          tripleFace = face;
-        }
-      });
-      if (tripleFace) {
-        for (let i = 0; i < 3; i++) {
-          const indexOfATripleFace = selectedDice.findIndex(
-            (die) => die.face === tripleFace
-          );
-          selectedDice.splice(indexOfATripleFace, 1);
-        }
-        setCurrentRollScore(
-          (prev) => prev + (tripleFace === 1 ? 1000 : tripleFace * 100)
-        ); //todo when implementing config, pull this value from a lookup
-        setScoringString(
-          (prev) =>
-            prev +
-            (prev ? " + " : "") +
-            scoreGroupStrings.triple +
-            " " +
-            tripleFace
-        );
-      }
-
-      // check if 1
-      const indexOf1 = selectedDice.findIndex((die) => die.face === 1);
-      if (indexOf1 !== -1) {
-        selectedDice.splice(indexOf1, 1);
-        setCurrentRollScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
-        setScoringString(
-          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.one
-        );
-        repeat = true;
-      }
-
-      // check if 5
-      const indexOf5 = selectedDice.findIndex((die) => die.face === 5);
-      if (indexOf5 !== -1) {
-        selectedDice.splice(indexOf5, 1);
-        setCurrentRollScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
-        setScoringString(
-          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.five
-        );
-        repeat = true;
       }
     } while (repeat && selectedDice.length > 0);
     const isValidSelection = selectedDice.length < 1;
