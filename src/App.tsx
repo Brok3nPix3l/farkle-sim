@@ -305,7 +305,7 @@ const App: Component = () => {
   return (
     <div class="flex flex-col h-[100svh] justify-center">
       {currentTurnScore() && (
-        <p class="self-end text-xl mb-4">Current Turn: {currentTurnScore()}</p>
+        <p class="self-end text-xl mb-4 mr-4">Current Turn: {currentTurnScore()}</p>
       )}
       <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
