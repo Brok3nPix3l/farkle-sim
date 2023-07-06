@@ -289,7 +289,7 @@ const App: Component = () => {
     );
   };
   const rollDice = () => {
-    setValidSelection(false);
+    setValidSelection(false);//todo replace with checkIfSelectionIsValid? I don't think there's ever a scenario where rolling the dice is valid, but maybe with some config changes down the line?
     setCurrentTurnScore((prev) => prev + currentRollScore());
     setCurrentRollScore(0);
     setScoringString("");
@@ -305,7 +305,9 @@ const App: Component = () => {
   return (
     <div class="flex flex-col h-[100svh] justify-center">
       {currentTurnScore() && (
-        <p class="self-end text-xl mb-4 mr-4">Current Turn: {currentTurnScore()}</p>
+        <p class="self-end text-xl mb-4 mr-4">
+          Current Turn: {currentTurnScore()}
+        </p>
       )}
       <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
@@ -326,7 +328,9 @@ const App: Component = () => {
           }}
         </For>
       </div>
-      {storedDice().length && <hr class="border-dashed border-8"></hr>}
+      {storedDice().length && (
+        <hr class="border-dashed border-8 border-gray-700"></hr>
+      )}
       <div class="flex flex-row justify-evenly w-full pt-5 pb-10 flex-wrap gap-5">
         <For each={activeDice()}>
           {(die) => {
@@ -345,8 +349,10 @@ const App: Component = () => {
         <button class="w-full text-center text-2xl" onclick={rollDice}>
           Roll
         </button>
-      ) : (
+      ) : dice.some((die) => die.selectable) ? (
         <p class="text-center text-2xl">Select or remove dice</p>
+      ) : (
+        <p class="text-center text-2xl">Farkle!</p>
       )}
     </div>
   );
