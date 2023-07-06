@@ -293,8 +293,8 @@ const App: Component = () => {
     setScoringDiceAsSelectable();
   };
   return (
-    <>
-      <p class="text-4xl text-green-700 text-center py-20">Farkle Sim</p>
+    <div class="flex flex-col h-screen justify-center">
+      <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
           currentTurnScore() ? ` - ${currentTurnScore()}` : ""
@@ -335,7 +335,7 @@ const App: Component = () => {
       ) : (
         <p class="text-center text-2xl">Select or remove dice</p>
       )}
-    </>
+    </div>
   );
 };
 
