@@ -19,6 +19,10 @@ const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
   const [currentRollScore, setCurrentRollScore] = createSignal(0);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
+  const [currentOverallScore, setCurrentOverallScore] = createSignal(0);
+  createEffect(() =>
+    console.log(`Current overall score: ${currentOverallScore()}`)
+  );
   const [scoringString, setScoringString] = createSignal("");
   const [dice, setDice] = createStore<DieState[]>([
     {
@@ -302,6 +306,17 @@ const App: Component = () => {
     resetSelectable();
     setScoringDiceAsSelectable();
   };
+  const endTurn = () => {
+    setValidSelection(true);
+    setCurrentOverallScore(
+      (prev) => prev + currentTurnScore() + currentRollScore()
+    );
+    setCurrentTurnScore(0);
+    setCurrentRollScore(0);
+    setScoringString("");
+    resetSelectable();
+    resetDice();
+  };
   const resetDice = () => {
     setDice(
       (die) => die.locked,
@@ -325,7 +340,7 @@ const App: Component = () => {
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
           currentRollScore() ? ` - ${currentRollScore()}` : ""
-        }${activeDice().length ? "" : " Rollout!"}`}</p>
+        }${activeDice().length || !validSelection() ? "" : " Rollout!"}`}</p>
       )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
         <For each={storedDice()}>
@@ -359,9 +374,22 @@ const App: Component = () => {
 
       {validSelection() ? (
         activeDice().length ? (
-          <button class="w-full text-center text-2xl" onclick={rollDice}>
-            Roll
-          </button>
+          <div class="flex flex-row justify-center ml-16 mr-16 gap-10">
+            <button
+              class="px-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
+              onclick={rollDice}
+            >
+              Roll
+            </button>
+            {(currentRollScore() || currentTurnScore()) && (
+              <button
+                class=" p-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
+                onclick={endTurn}
+              >
+                Hold
+              </button>
+            )}
+          </div>
         ) : (
           <button
             class="text-center text-2xl"
