@@ -1,6 +1,6 @@
 import { type Component, For, createEffect, on, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
-import Die from "./Die";
+import Die, { DieState } from "./Die";
 
 enum scoreGroupIds {
   LG_STRAIGHT = 10,
@@ -10,60 +10,57 @@ enum scoreGroupIds {
 enum scoreGroupStrings {
   one = "one",
   five = "five",
+  triple = "triple",
+  lgStraight = "1-2-3-4-5-6",
+  threePairs = "three pairs",
 }
 
 const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
   const [scoringString, setScoringString] = createSignal("");
-  const [dice, setDice] = createStore([
+  const [dice, setDice] = createStore<DieState[]>([
     {
       index: 0,
-      value: 1,
+      face: 1,
       held: false,
       locked: false,
       selectable: false,
-      group: 0,
     },
     {
       index: 1,
-      value: 2,
+      face: 2,
       held: false,
       locked: false,
       selectable: false,
-      group: 1,
     },
     {
       index: 2,
-      value: 3,
+      face: 3,
       held: false,
       locked: false,
       selectable: false,
-      group: 2,
     },
     {
       index: 3,
-      value: 4,
+      face: 4,
       held: false,
       locked: false,
       selectable: false,
-      group: 3,
     },
     {
       index: 4,
-      value: 5,
+      face: 5,
       held: false,
       locked: false,
       selectable: false,
-      group: 4,
     },
     {
       index: 5,
-      value: 6,
+      face: 6,
       held: false,
       locked: false,
       selectable: false,
-      group: 5,
     },
   ]);
   const resetSelectable = () => {
@@ -73,47 +70,33 @@ const App: Component = () => {
       (selectable) => false
     );
   };
-  const resetGroups = () => {
-    //todo refactor to only use active dice?
-    dice.forEach((die) => {
-      setGroup(die.index, die.index);
-    });
-  };
-  const setGroup = (index: number, value: number) => {
-    setDice(
-      (die) => die.index === index,
-      "group",
-      (group) => value
-    );
-  };
   const setScoringDiceAsSelectable = () => {
     set1AsSelectable();
     set5AsSelectable();
-    const frequencyMap = createFrequencyMap();
+    const frequencyMap = createFrequencyMap(activeDice());
     setTripleAsSelectable(frequencyMap);
     setLgStraightAsSelectable(frequencyMap);
     set3PairsAsSeleactable(frequencyMap);
   };
   const set1AsSelectable = () =>
     setDice(
-      (die) => die.value === 1 && !die.held,
+      (die) => die.face === 1 && !die.held,
       "selectable",
       (selectable) => true
     );
   const set5AsSelectable = () =>
     setDice(
-      (die) => die.value === 5 && !die.held,
+      (die) => die.face === 5 && !die.held,
       "selectable",
       (selectable) => true
     );
-  const createFrequencyMap = () => {
+  const createFrequencyMap = (dice) => {
     const frequencyMap = new Map<number, number>();
     dice.forEach((die) => {
-      if (die.held) return;
-      if (frequencyMap.has(die.value)) {
-        frequencyMap.set(die.value, frequencyMap.get(die.value) + 1);
+      if (frequencyMap.has(die.face)) {
+        frequencyMap.set(die.face, frequencyMap.get(die.face) + 1);
       } else {
-        frequencyMap.set(die.value, 1);
+        frequencyMap.set(die.face, 1);
       }
     });
     return frequencyMap;
@@ -127,15 +110,9 @@ const App: Component = () => {
     if (valuesWithTriples.length > 0) {
       valuesWithTriples.forEach((value) => {
         setDice(
-          (die) => die.value === value,
+          (die) => die.face === value,
           "selectable",
           (selectable) => true
-        );
-        setDice(
-          (die) => die.value === value,
-          "group",
-          //todo uuid?
-          (group) => value * 10
         );
       });
     }
@@ -148,63 +125,102 @@ const App: Component = () => {
       "selectable",
       (selectable) => true
     );
-    setDice(
-      (die) => !die.held,
-      "group",
-      (group) => scoreGroupIds.LG_STRAIGHT
-    );
   };
   const set3PairsAsSeleactable = (frequencyMap: Map<number, number>) => {
     if (frequencyMap.size !== 2 && frequencyMap.size !== 3) return;
     let good = true;
-    frequencyMap.forEach((value, key) => {
-      if (value !== 2 && value !== 4) good = false;
+    frequencyMap.forEach((frequency) => {
+      if (frequency !== 2 && frequency !== 4) good = false;
     });
     if (good) {
       setDice(
-        (die) => frequencyMap.has(die.value),
+        (die) => frequencyMap.has(die.face),
         "selectable",
         (selectable) => true
       );
-      setDice(
-        (die) => frequencyMap.has(die.value),
-        "group",
-        (group) => scoreGroupIds.THREE_PAIRS
-      );
     }
   };
-  // createEffect(
-  //   on(
-  //     //todo figure out what this should actually be watching
-  //     () => dice.filter((die) => die.value === 1),
-  //     () => {
-  //       resetSelectable();
-  //       resetGroups();
-  //       set1AsSelectable();
-  //       set5AsSelectable();
-  //       const frequencyMap = createFrequencyMap();
-  //       setTripleAsSelectable(frequencyMap);
-  //       setLgStraightAsSelectable(frequencyMap);
-  //     }
-  //   )
-  // );
   const activeDice = () => dice.filter((die) => die.held === false);
   const storedDice = () => dice.filter((die) => die.held === true);
   const incrementValue = (index: number) => {
     setDice(
       (die) => die.index === index,
-      "value",
-      (value) => (value + 1) % 6 || 6
+      "face",
+      (face) => (face + 1) % 6 || 6
     );
   };
   const checkIfSelectionIsValid = () => {
+    setDice(
+      (die) => die.invalid,
+      "invalid",
+      (invalid) => undefined
+    );
     setCurrentTurnScore(0);
     setScoringString("");
     let selectedDice = dice.filter((die) => die.held && die.selectable);
     let repeat = false;
     do {
       repeat = false;
-      const indexOf1 = selectedDice.findIndex((die) => die.value === 1);
+      //todo encapsulate these validation functions and sort them by score; use same validation here and in setScoringDiceAsSelectable?
+
+      const frequencyMap = createFrequencyMap(selectedDice);
+      // check if lgStraight
+      //todo breaks if using > 6 dice
+      if (frequencyMap.size === 6) {
+        selectedDice.splice(0);
+        setCurrentTurnScore((prev) => prev + 3000);
+        setScoringString(
+          (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.lgStraight
+        );
+      }
+      // check if 3Pairs
+      if (selectedDice.length === 6) {
+        if (frequencyMap.size === 2 || frequencyMap.size === 3) {
+          let good = true;
+          frequencyMap.forEach((frequency) => {
+            if (frequency !== 2 && frequency !== 4) good = false;
+          });
+          if (good) {
+            selectedDice.splice(0);
+            setCurrentTurnScore((prev) => prev + 1500);
+            setScoringString(
+              (prev) =>
+                prev + (prev ? " + " : "") + scoreGroupStrings.threePairs
+            );
+          }
+        }
+      }
+
+      // check if triple
+      let tripleFace: number;
+      frequencyMap.forEach((frequency, face) => {
+        //todo refactor when implementing quads+
+        if (frequency >= 3) {
+          tripleFace = face;
+        }
+      });
+      if (tripleFace) {
+        for (let i = 0; i < 3; i++) {
+          const indexOfATripleFace = selectedDice.findIndex(
+            (die) => die.face === tripleFace
+          );
+          selectedDice.splice(indexOfATripleFace, 1);
+        }
+        setCurrentTurnScore(
+          (prev) => prev + (tripleFace === 1 ? 1000 : tripleFace * 100)
+        ); //todo when implementing config, pull this value from a lookup
+        setScoringString(
+          (prev) =>
+            prev +
+            (prev ? " + " : "") +
+            scoreGroupStrings.triple +
+            " " +
+            tripleFace
+        );
+      }
+
+      // check if 1
+      const indexOf1 = selectedDice.findIndex((die) => die.face === 1);
       if (indexOf1 !== -1) {
         selectedDice.splice(indexOf1, 1);
         setCurrentTurnScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
@@ -213,7 +229,9 @@ const App: Component = () => {
         );
         repeat = true;
       }
-      const indexOf5 = selectedDice.findIndex((die) => die.value === 5);
+
+      // check if 5
+      const indexOf5 = selectedDice.findIndex((die) => die.face === 5);
       if (indexOf5 !== -1) {
         selectedDice.splice(indexOf5, 1);
         setCurrentTurnScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
@@ -223,6 +241,14 @@ const App: Component = () => {
         repeat = true;
       }
     } while (repeat && selectedDice.length > 0);
+    const isValidSelection = selectedDice.length < 1;
+    if (!isValidSelection) {
+      setDice(
+        (die) => selectedDice.map((die) => die.index).includes(die.index),
+        "invalid",
+        (invalid) => true
+      );
+    }
     setValidSelection(selectedDice.length < 1);
   };
   const toggleHeld = (index: number) => {
@@ -234,9 +260,6 @@ const App: Component = () => {
       alert("Cannot toggle held on this unselectable die");
       return;
     }
-    // const targetGroup = dice.find((die) => die.index === index).group;
-    // console.log(`targetGroup: ${targetGroup}`);
-    // console.table(dice);
     setDice(
       (die) => die.index === index,
       "held",
@@ -263,11 +286,10 @@ const App: Component = () => {
     lockDice();
     setDice(
       (die) => !die.held,
-      "value",
-      (value) => Math.ceil(Math.random() * 6)
+      "face",
+      (face) => Math.ceil(Math.random() * 6)
     );
     resetSelectable();
-    resetGroups();
     setScoringDiceAsSelectable();
   };
   return (
