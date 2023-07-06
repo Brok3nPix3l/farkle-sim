@@ -17,6 +17,7 @@ enum scoreGroupStrings {
 
 const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
+  const [currentRollScore, setCurrentRollScore] = createSignal(0);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
   const [scoringString, setScoringString] = createSignal("");
   const [dice, setDice] = createStore<DieState[]>([
@@ -155,7 +156,7 @@ const App: Component = () => {
       "invalid",
       (invalid) => undefined
     );
-    setCurrentTurnScore(0);
+    setCurrentRollScore(0);
     setScoringString("");
     let selectedDice = dice.filter((die) => die.held && die.selectable);
     let repeat = false;
@@ -168,7 +169,7 @@ const App: Component = () => {
       //todo breaks if using > 6 dice
       if (frequencyMap.size === 6) {
         selectedDice.splice(0);
-        setCurrentTurnScore((prev) => prev + 3000);
+        setCurrentRollScore((prev) => prev + 3000);
         setScoringString(
           (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.lgStraight
         );
@@ -182,11 +183,12 @@ const App: Component = () => {
           });
           if (good) {
             selectedDice.splice(0);
-            setCurrentTurnScore((prev) => prev + 1500);
+            setCurrentRollScore((prev) => prev + 1500);
             setScoringString(
               (prev) =>
                 prev + (prev ? " + " : "") + scoreGroupStrings.threePairs
             );
+            break;
           }
         }
       }
@@ -206,7 +208,7 @@ const App: Component = () => {
           );
           selectedDice.splice(indexOfATripleFace, 1);
         }
-        setCurrentTurnScore(
+        setCurrentRollScore(
           (prev) => prev + (tripleFace === 1 ? 1000 : tripleFace * 100)
         ); //todo when implementing config, pull this value from a lookup
         setScoringString(
@@ -223,7 +225,7 @@ const App: Component = () => {
       const indexOf1 = selectedDice.findIndex((die) => die.face === 1);
       if (indexOf1 !== -1) {
         selectedDice.splice(indexOf1, 1);
-        setCurrentTurnScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
+        setCurrentRollScore((prev) => prev + 100); //todo when implementing config, pull this value from a lookup
         setScoringString(
           (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.one
         );
@@ -234,7 +236,7 @@ const App: Component = () => {
       const indexOf5 = selectedDice.findIndex((die) => die.face === 5);
       if (indexOf5 !== -1) {
         selectedDice.splice(indexOf5, 1);
-        setCurrentTurnScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
+        setCurrentRollScore((prev) => prev + 50); //todo when implementing config, pull this value from a lookup
         setScoringString(
           (prev) => prev + (prev ? " + " : "") + scoreGroupStrings.five
         );
@@ -281,7 +283,8 @@ const App: Component = () => {
   };
   const rollDice = () => {
     setValidSelection(false);
-    setCurrentTurnScore(0);
+    setCurrentTurnScore((prev) => prev + currentRollScore());
+    setCurrentRollScore(0);
     setScoringString("");
     lockDice();
     setDice(
@@ -294,10 +297,13 @@ const App: Component = () => {
   };
   return (
     <div class="flex flex-col h-[100svh] justify-center">
+      {currentTurnScore() && (
+        <p class="self-end text-xl mb-4">Current Turn: {currentTurnScore()}</p>
+      )}
       <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
-          currentTurnScore() ? ` - ${currentTurnScore()}` : ""
+          currentRollScore() ? ` - ${currentRollScore()}` : ""
         }`}</p>
       )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
