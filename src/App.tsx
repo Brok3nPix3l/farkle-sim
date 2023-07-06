@@ -289,7 +289,7 @@ const App: Component = () => {
     );
   };
   const rollDice = () => {
-    setValidSelection(false);//todo replace with checkIfSelectionIsValid? I don't think there's ever a scenario where rolling the dice is valid, but maybe with some config changes down the line?
+    setValidSelection(false); //todo replace with checkIfSelectionIsValid? I don't think there's ever a scenario where rolling the dice is valid, but maybe with some config changes down the line?
     setCurrentTurnScore((prev) => prev + currentRollScore());
     setCurrentRollScore(0);
     setScoringString("");
@@ -302,6 +302,18 @@ const App: Component = () => {
     resetSelectable();
     setScoringDiceAsSelectable();
   };
+  const resetDice = () => {
+    setDice(
+      (die) => die.locked,
+      "locked",
+      (locked) => false
+    );
+    setDice(
+      (die) => die.held,
+      "held",
+      (held) => false
+    );
+  };
   return (
     <div class="flex flex-col h-[100svh] justify-center">
       {currentTurnScore() && (
@@ -313,7 +325,7 @@ const App: Component = () => {
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
           currentRollScore() ? ` - ${currentRollScore()}` : ""
-        }`}</p>
+        }${activeDice().length ? "" : " Rollout!"}`}</p>
       )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
         <For each={storedDice()}>
@@ -346,9 +358,21 @@ const App: Component = () => {
       </div>
 
       {validSelection() ? (
-        <button class="w-full text-center text-2xl" onclick={rollDice}>
-          Roll
-        </button>
+        activeDice().length ? (
+          <button class="w-full text-center text-2xl" onclick={rollDice}>
+            Roll
+          </button>
+        ) : (
+          <button
+            class="text-center text-2xl"
+            onclick={() => {
+              resetDice();
+              rollDice();
+            }}
+          >
+            Roll again
+          </button>
+        )
       ) : dice.some((die) => die.selectable) ? (
         <p class="text-center text-2xl">Select or remove dice</p>
       ) : (
