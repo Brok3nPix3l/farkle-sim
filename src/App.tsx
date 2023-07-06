@@ -17,6 +17,7 @@ enum scoreGroupStrings {
 
 const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
+  const [scoreboardModalRef, setScoreboardModalRef] = createSignal(null);
   const [currentRollScore, setCurrentRollScore] = createSignal(0);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
   const [currentOverallScore, setCurrentOverallScore] = createSignal(0);
@@ -329,13 +330,75 @@ const App: Component = () => {
       (held) => false
     );
   };
+  const viewScoreboard = () => {
+    scoreboardModalRef().showModal();
+  };
+  const hideScoreboard = () => {
+    scoreboardModalRef().close();
+  };
   return (
     <div class="flex flex-col h-[100svh] justify-center">
-      {currentTurnScore() && (
-        <p class="self-end text-xl mb-4 mr-4">
-          Current Turn: {currentTurnScore()}
-        </p>
-      )}
+      <dialog
+        class="backdrop:bg-black backdrop:opacity-50"
+        ref={setScoreboardModalRef}
+        onclick={(e) => {
+          const dialogDimensions = scoreboardModalRef().getBoundingClientRect();
+          if (
+            e.clientX < dialogDimensions.left ||
+            e.clientX > dialogDimensions.right ||
+            e.clientY < dialogDimensions.top ||
+            e.clientY > dialogDimensions.bottom
+          ) {
+            hideScoreboard();
+          }
+        }}
+      >
+        <h3 class="text-3xl">Scoreboard</h3>
+        <p class="text-2xl pt-10 pb-10">Current Score: {currentOverallScore()}</p>
+        <button
+          onclick={hideScoreboard}
+          class="p-4 text-center text-2xl border-4 border-gray-800 rounded-xl bg-gray-600 text-white"
+        >
+          Dismiss
+        </button>
+      </dialog>
+      <div class="flex flex-row justify-between mb-4 mx-4">
+        <button onclick={viewScoreboard}>
+          <svg
+            fill="none"
+            stroke-width="2"
+            xmlns="http://www.w3.org/2000/svg"
+            width="3em"
+            height="3em"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="overflow: visible; --darkreader-inline-stroke: currentColor;"
+            data-darkreader-inline-stroke=""
+          >
+            <path
+              stroke="none"
+              d="M0 0h24v24H0z"
+              fill="none"
+              data-darkreader-inline-stroke=""
+              style="--darkreader-inline-stroke: none;"
+            ></path>
+            <path d="M3 5m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path>
+            <path d="M12 5v2"></path>
+            <path d="M12 10v1"></path>
+            <path d="M12 14v1"></path>
+            <path d="M12 18v1"></path>
+            <path d="M7 3v2"></path>
+            <path d="M17 3v2"></path>
+            <path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z"></path>
+            <path d="M6 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5"></path>
+          </svg>
+        </button>
+        {currentTurnScore() && (
+          <p class="self-end text-xl">Current Turn: {currentTurnScore()}</p>
+        )}
+      </div>
       <p class="text-4xl text-green-700 text-center pb-10">Farkle Sim</p>
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
