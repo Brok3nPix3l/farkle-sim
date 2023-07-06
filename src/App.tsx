@@ -339,7 +339,7 @@ const App: Component = () => {
   return (
     <div class="flex flex-col h-[100svh] justify-center">
       <dialog
-        class="backdrop:bg-black backdrop:opacity-50"
+        class="backdrop:bg-black backdrop:opacity-50 rounded-md"
         ref={setScoreboardModalRef}
         onclick={(e) => {
           const dialogDimensions = scoreboardModalRef().getBoundingClientRect();
@@ -354,7 +354,9 @@ const App: Component = () => {
         }}
       >
         <h3 class="text-3xl">Scoreboard</h3>
-        <p class="text-2xl pt-10 pb-10">Current Score: {currentOverallScore()}</p>
+        <p class="text-2xl pt-10 pb-10">
+          Current Score: {currentOverallScore()}
+        </p>
         <button
           onclick={hideScoreboard}
           class="p-4 text-center text-2xl border-4 border-gray-800 rounded-xl bg-gray-600 text-white"
@@ -463,7 +465,7 @@ const App: Component = () => {
           </>
         ) : (
           <button
-            class="text-center text-2xl"
+            class="py-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
             onclick={() => {
               resetDice();
               rollDice();
