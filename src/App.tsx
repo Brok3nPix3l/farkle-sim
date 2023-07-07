@@ -17,6 +17,7 @@ enum scoreGroupStrings {
 
 const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
+  const [helperText, setHelperText] = createSignal("");
   const [scoreboardModalRef, setScoreboardModalRef] = createSignal(null);
   const [currentRollScore, setCurrentRollScore] = createSignal(0);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
@@ -336,6 +337,15 @@ const App: Component = () => {
   const hideScoreboard = () => {
     scoreboardModalRef().close();
   };
+  createEffect(() => {
+    if (!validSelection() && dice.some((die) => die.selectable))
+      return setHelperText("Select or remove dice");
+    if (validSelection() && scoringString() && !activeDice().length)
+      return setHelperText("ROLLOUT!");
+    if (!validSelection() && !dice.some((die) => die.selectable))
+      return setHelperText("FARKLE!");
+    return setHelperText("\u00A0");
+  });
   return (
     <div class="flex flex-col h-[100svh] justify-center">
       <dialog
@@ -405,14 +415,6 @@ const App: Component = () => {
       {scoringString && (
         <p class="text-center uppercase text-2xl">{`${scoringString()}${
           currentRollScore() ? ` - ${currentRollScore()}` : ""
-        }${
-          validSelection()
-            ? activeDice().length
-              ? ""
-              : " Rollout!"
-            : dice.some((die) => die.selectable)
-            ? ""
-            : " Farkle!"
         }`}</p>
       )}
       <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
@@ -445,49 +447,28 @@ const App: Component = () => {
         </For>
       </div>
 
-      {validSelection() ? (
-        activeDice().length ? (
-          <>
-            <button
-              class="py-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
-              onclick={rollDice}
-            >
-              Roll
-            </button>
-            {(currentRollScore() || currentTurnScore()) && (
-              <button
-                class=" py-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
-                onclick={endTurn}
-              >
-                Hold
-              </button>
-            )}
-          </>
-        ) : (
-          <button
-            class="py-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500"
-            onclick={() => {
-              resetDice();
-              rollDice();
-            }}
-          >
-            Roll again
-          </button>
-        )
-      ) : dice.some((die) => die.selectable) ? (
-        <p class="text-center text-2xl">Select or remove dice</p>
-      ) : (
-        <button
-          class="p-4 text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl"
-          onclick={() => {
-            setCurrentRollScore(0);
-            setCurrentTurnScore(0);
-            endTurn();
-          }}
-        >
-          End Turn
-        </button>
-      )}
+      <p class="text-center text-2xl">{helperText()}</p>
+      <button
+        class="py-4 text-center text-2xl border-4 border-emerald-700 rounded-xl bg-emerald-500 disabled:brightness-50"
+        onclick={() => {
+          if (!activeDice().length) resetDice();
+          rollDice();
+        }}
+        disabled={!validSelection()}
+      >
+        {activeDice().length ? "Roll" : "Roll again"}
+      </button>
+      <button
+        class=" py-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl disabled:brightness-50"
+        onclick={endTurn}
+        disabled={
+          validSelection() && !(currentRollScore() || currentTurnScore())
+        }
+      >
+        {!validSelection() && !dice.some((die) => die.selectable)
+          ? "End Turn"
+          : "Bank"}
+      </button>
     </div>
   );
 };
