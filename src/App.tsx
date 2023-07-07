@@ -549,7 +549,10 @@ const App: Component = () => {
             endTurn();
           }}
           disabled={
-            validSelection() && !(currentRollScore() || currentTurnScore())
+            !(
+              validSelection() &&
+              (!!currentRollScore() || !!currentTurnScore())
+            )
           }
         >
           {!validSelection() && !dice.some((die) => die.selectable)
