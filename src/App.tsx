@@ -381,7 +381,7 @@ const App: Component = () => {
         </button>
       </dialog>
       <div id="header">
-        <div class="flex flex-row justify-between mb-4 mx-4">
+        <div class="flex flex-row justify-between mt-4 mb-4 mx-4">
           <button onclick={viewScoreboard}>
             <svg
               fill="none"
@@ -414,8 +414,12 @@ const App: Component = () => {
               <path d="M6 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5"></path>
             </svg>
           </button>
-          {currentTurnScore() && (
-            <p class="self-end text-xl">Current Turn: {currentTurnScore()}</p>
+          {currentTurnScore() + currentRollScore() ? (
+            <p class="text-xl">
+              Current Turn: {currentTurnScore() + currentRollScore()}
+            </p>
+          ) : (
+            ""
           )}
         </div>
         {scoringString && (
