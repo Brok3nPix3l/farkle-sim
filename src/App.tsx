@@ -168,6 +168,7 @@ const App: Component = () => {
       (invalid) => undefined
     );
     let selectedDice = dice.filter((die) => die.held && die.selectable);
+    if (selectedDice.length === 0) return setValidSelection(false);
     let repeat = false;
     do {
       repeat = false;
