@@ -115,9 +115,14 @@ const App: Component = () => {
       if (value >= 3) valuesWithTriples.push(key);
     });
     if (valuesWithTriples.length > 0) {
+      //todo mark all dice with same value as selectable and then revoke the selectability based on held dice
       valuesWithTriples.forEach((value) => {
+        const indicies = dice
+          .filter((die) => die.face === value)
+          .map((die) => die.index)
+          .slice(0, 3);
         setDice(
-          (die) => die.face === value,
+          (die) => indicies.includes(die.index),
           "selectable",
           (selectable) => true
         );
@@ -460,7 +465,13 @@ const App: Component = () => {
       </button>
       <button
         class=" py-4 text-center text-2xl border-4 bg-amber-600 border-amber-800 rounded-xl disabled:brightness-50"
-        onclick={endTurn}
+        onclick={() => {
+          if (!validSelection() && !dice.some((die) => die.selectable)) {
+            setCurrentTurnScore(0);
+            setCurrentRollScore(0);
+          }
+          endTurn();
+        }}
         disabled={
           validSelection() && !(currentRollScore() || currentTurnScore())
         }
