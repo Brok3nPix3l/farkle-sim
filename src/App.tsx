@@ -168,6 +168,7 @@ const App: Component = () => {
       (invalid) => undefined
     );
     let selectedDice = dice.filter((die) => die.held && die.selectable);
+    if (selectedDice.length === 0) return setValidSelection(false);
     let repeat = false;
     do {
       repeat = false;
@@ -380,7 +381,7 @@ const App: Component = () => {
         </button>
       </dialog>
       <div id="header">
-        <div class="flex flex-row justify-between mb-4 mx-4">
+        <div class="flex flex-row justify-between pt-2 px-2">
           <button onclick={viewScoreboard}>
             <svg
               fill="none"
@@ -413,8 +414,12 @@ const App: Component = () => {
               <path d="M6 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5"></path>
             </svg>
           </button>
-          {currentTurnScore() && (
-            <p class="self-end text-xl">Current Turn: {currentTurnScore()}</p>
+          {currentTurnScore() + currentRollScore() ? (
+            <p class=" self-center text-xl">
+              Current Turn: {currentTurnScore() + currentRollScore()}
+            </p>
+          ) : (
+            ""
           )}
         </div>
         {scoringString && (
@@ -424,7 +429,7 @@ const App: Component = () => {
         )}
       </div>
       <div id="dice">
-        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
+        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5">
           <For each={storedDice()}>
             {(die) => {
               return (
@@ -440,7 +445,7 @@ const App: Component = () => {
         {storedDice().length && (
           <hr class="border-dashed border-8 border-gray-700"></hr>
         )}
-        <div class="flex flex-row justify-evenly w-full pt-5 pb-10 flex-wrap gap-5">
+        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5">
           {/* fixme this is getting ugly */}
           {/* {activeDice().find(
             (die) => die.index === 0 || die.index === 1 || die.index === 2
@@ -549,7 +554,11 @@ const App: Component = () => {
             endTurn();
           }}
           disabled={
-            validSelection() && !(currentRollScore() || currentTurnScore())
+            !(
+              (validSelection() &&
+                (!!currentRollScore() || !!currentTurnScore())) ||
+              (!validSelection() && !dice.some((die) => die.selectable))
+            )
           }
         >
           {!validSelection() && !dice.some((die) => die.selectable)

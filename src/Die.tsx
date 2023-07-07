@@ -48,7 +48,7 @@ const Die: Component<DieProps> = (props: DieProps) => {
   ]);
   return (
     <img
-      class={`lg:w-32 md:w-28 w-24 cursor-pointer ${
+      class={`lg:w-32 md:w-28 w-20 cursor-pointer ${
         local.state.selectable ? "" : "saturate-50"
       }${local.state.invalid ? "border-red-400 border-dashed border-8" : ""}`}
       src={valueToImage(local.state.face)}
