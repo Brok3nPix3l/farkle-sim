@@ -381,7 +381,7 @@ const App: Component = () => {
         </button>
       </dialog>
       <div id="header">
-        <div class="flex flex-row justify-between mt-4 mb-4 mx-4">
+        <div class="flex flex-row justify-between pt-2 px-2">
           <button onclick={viewScoreboard}>
             <svg
               fill="none"
@@ -415,7 +415,7 @@ const App: Component = () => {
             </svg>
           </button>
           {currentTurnScore() + currentRollScore() ? (
-            <p class="text-xl">
+            <p class=" self-center text-xl">
               Current Turn: {currentTurnScore() + currentRollScore()}
             </p>
           ) : (
@@ -429,7 +429,7 @@ const App: Component = () => {
         )}
       </div>
       <div id="dice">
-        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5 pb-5">
+        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5">
           <For each={storedDice()}>
             {(die) => {
               return (
@@ -445,7 +445,7 @@ const App: Component = () => {
         {storedDice().length && (
           <hr class="border-dashed border-8 border-gray-700"></hr>
         )}
-        <div class="flex flex-row justify-evenly w-full pt-5 pb-10 flex-wrap gap-5">
+        <div class="flex flex-row justify-evenly w-full flex-wrap gap-5">
           {/* fixme this is getting ugly */}
           {/* {activeDice().find(
             (die) => die.index === 0 || die.index === 1 || die.index === 2
@@ -555,8 +555,9 @@ const App: Component = () => {
           }}
           disabled={
             !(
-              validSelection() &&
-              (!!currentRollScore() || !!currentTurnScore())
+              (validSelection() &&
+                (!!currentRollScore() || !!currentTurnScore())) ||
+              (!validSelection() && !dice.some((die) => die.selectable))
             )
           }
         >
