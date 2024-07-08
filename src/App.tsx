@@ -19,6 +19,7 @@ const App: Component = () => {
   const [validSelection, setValidSelection] = createSignal(true);
   const [helperText, setHelperText] = createSignal("");
   const [scoreboardModalRef, setScoreboardModalRef] = createSignal(null);
+  const [settingsModelRef, setSettingsModelRef] = createSignal(null);
   const [currentRollScore, setCurrentRollScore] = createSignal(0);
   const [currentTurnScore, setCurrentTurnScore] = createSignal(0);
   const [currentOverallScore, setCurrentOverallScore] = createSignal(0);
@@ -345,6 +346,12 @@ const App: Component = () => {
   const hideScoreboard = () => {
     scoreboardModalRef().close();
   };
+  const viewSettings = () => {
+    settingsModelRef().showModal();
+  }
+  const hideSettings = () => {
+    settingsModelRef().close();
+  }
   createEffect(() => {
     if (!validSelection() && dice.some((die) => die.selectable))
       return setHelperText("Select or remove dice");
@@ -382,47 +389,91 @@ const App: Component = () => {
           Dismiss
         </button>
       </dialog>
+      <dialog
+        class="backdrop:bg-black backdrop:opacity-50 rounded-md"
+        ref={setSettingsModelRef}
+        onclick={(e) => {
+          const dialogDimensions = settingsModelRef().getBoundingClientRect();
+          if (
+            e.clientX < dialogDimensions.left ||
+            e.clientX > dialogDimensions.right ||
+            e.clientY < dialogDimensions.top ||
+            e.clientY > dialogDimensions.bottom
+          ) {
+            hideSettings();
+          }
+        }}
+      >
+        <h3 class="text-3xl">Settings</h3>
+        <p class="text-2xl pt-10 pb-10">
+          Todo
+        </p>
+        <button
+          onclick={hideSettings}
+          class="p-4 text-center text-2xl border-4 border-gray-800 rounded-xl bg-gray-600 text-white"
+        >
+          Dismiss
+        </button>
+      </dialog>
       <div id="header">
         <div class="flex flex-row justify-between pt-2 px-2">
-          <button onclick={viewScoreboard}>
-            <svg
-              fill="none"
-              stroke-width="2"
-              xmlns="http://www.w3.org/2000/svg"
-              width="3em"
-              height="3em"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              style="overflow: visible; --darkreader-inline-stroke: currentColor;"
-              data-darkreader-inline-stroke=""
-            >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
+          <div class="flex gap-4">
+            <button onclick={viewScoreboard}>
+              <svg
                 fill="none"
-                data-darkreader-inline-stroke=""
-                style="--darkreader-inline-stroke: none;"
-              ></path>
-              <path d="M3 5m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path>
-              <path d="M12 5v2"></path>
-              <path d="M12 10v1"></path>
-              <path d="M12 14v1"></path>
-              <path d="M12 18v1"></path>
-              <path d="M7 3v2"></path>
-              <path d="M17 3v2"></path>
-              <path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z"></path>
-              <path d="M6 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5"></path>
-            </svg>
-          </button>
-          {currentTurnScore() + currentRollScore() ? (
-            <p class=" self-center text-xl">
-              Current Turn: {currentTurnScore() + currentRollScore()}
-            </p>
-          ) : (
-            ""
-          )}
+                stroke-width="2"
+                xmlns="http://www.w3.org/2000/svg"
+                width="3em"
+                height="3em"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="overflow: visible;"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M3 5m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path>
+                <path d="M12 5v2"></path>
+                <path d="M12 10v1"></path>
+                <path d="M12 14v1"></path>
+                <path d="M12 18v1"></path>
+                <path d="M7 3v2"></path>
+                <path d="M17 3v2"></path>
+                <path d="M15 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z"></path>
+                <path d="M6 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5"></path>
+              </svg>
+            </button>
+            <button onclick={viewSettings}>
+              <svg
+                fill="currentColor"
+                width="3em"
+                height="3em"
+                viewBox="0 0 340.274 340.274"
+              >
+                <g>
+                  <path
+                    d="M293.629,127.806l-5.795-13.739c19.846-44.856,18.53-46.189,14.676-50.08l-25.353-24.77l-2.516-2.12h-2.937
+				c-1.549,0-6.173,0-44.712,17.48l-14.184-5.719c-18.332-45.444-20.212-45.444-25.58-45.444h-35.765
+				c-5.362,0-7.446-0.006-24.448,45.606l-14.123,5.734C86.848,43.757,71.574,38.19,67.452,38.19l-3.381,0.105L36.801,65.032
+				c-4.138,3.891-5.582,5.263,15.402,49.425l-5.774,13.691C0,146.097,0,147.838,0,153.33v35.068c0,5.501,0,7.44,46.585,24.127
+				l5.773,13.667c-19.843,44.832-18.51,46.178-14.655,50.032l25.353,24.8l2.522,2.168h2.951c1.525,0,6.092,0,44.685-17.516
+				l14.159,5.758c18.335,45.438,20.218,45.427,25.598,45.427h35.771c5.47,0,7.41,0,24.463-45.589l14.195-5.74
+				c26.014,11,41.253,16.585,45.349,16.585l3.404-0.096l27.479-26.901c3.909-3.945,5.278-5.309-15.589-49.288l5.734-13.702
+				c46.496-17.967,46.496-19.853,46.496-25.221v-35.029C340.268,146.361,340.268,144.434,293.629,127.806z M170.128,228.474
+				c-32.798,0-59.504-26.187-59.504-58.364c0-32.153,26.707-58.315,59.504-58.315c32.78,0,59.43,26.168,59.43,58.315
+				C229.552,202.287,202.902,228.474,170.128,228.474z"
+                  />
+                </g>
+              </svg>
+            </button>
+          </div>
+          {/* {currentTurnScore() ? ( */}
+          <p class=" self-center text-xl">
+            Current Turn Score: {currentTurnScore()}
+          </p>
+          {/* ) : ( */}
+          {/* "" */}
+          {/* )} */}
         </div>
         {scoringString && (
           <p class="text-center uppercase text-2xl">{`${scoringString()}${
